@@ -1,0 +1,9 @@
+git config user.name 'root'
+git config user.email 'root@academy'
+
+now create flag.txt file using touch flag.txt
+
+git add .
+git commit -m 'changes'
+git push origin master
+

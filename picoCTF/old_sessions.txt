@@ -1,0 +1,6 @@
+1. navigate to the website and register as user test with password test
+2. notice that the comments section tells that there is an interesting page on /sessions
+3. navigate to /sessions by modifying the website url
+4. notice that there is an admin session cookie
+5. open browser inspect tool and change your existing session cookie with the admin session cookie
+6. go back to the main website page and get the flag.

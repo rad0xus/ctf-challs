@@ -1,0 +1,46 @@
+When compiling C/C++ source code in Linux, an ELF (Executable and Linkable Format) file is           ◉
+created. The flags added when compiling can affect the binary in various ways, like the              ◉
+protections. 
+
+file vuln
+vuln: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=27b9eb7d3cde9a2971125ec5404e88507efcac02, for GNU/Linux 3.2.0, not stripped
+
+strings vuln
+This file uses standard library functions like fgets so it is dynamically linked
+
+You can confirm this using file vuln command as well.
+
+If the binary contains debugging information then we can say that it was NOT compiled using the -s flag. 
+
+If the binary contains debugging information we can use tools like gdb (gnu-debugger)
+
+checksec --file=vuln shows
+
+┌─[ff02x9e@parrot]─[~/picoCTF/temp]
+└──╼ $checksec --file=vuln
+RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified     Fortifiable     FILE
+Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   No RUNPATH   40 Symbols        No    0    1vuln
+
+An NX (No-Execute) enabled binary is a compiled program that uses processor hardware features to block code from running inside memory regions meant strictly for data (such as the stack or heap).
+
+
+How It Works
+
+• Write XOR Execute (\(\text{W} \oplus \text{X}\)): Memory pages are designated as either writable or executable, never both at the same time.
+• Hardware Enforcement: The CPU checks a special bit in the page table (known as the NX bit on AMD/x86, XD bit on Intel, or XN on ARM).
+• Crash on Violation: If an attacker tries to inject and execute malicious shellcode inside a data buffer (like during a buffer overflow attack), the CPU triggers a protection fault and terminates the program instead of running the code.
+
+The primary exploitation technique used to bypass the NX (No-Execute) or DEP (Data Execution Prevention) protection is Return-Oriented Programming (ROP).
+Because NX marks data segments (like the stack and heap) as non-executable to prevent shellcode from running directly, attackers rely on code-reuse primitives to execute code that is already marked as executable within the binary or its loaded libraries.
+
+
+Common NX Bypass Variations
+
+• Return-to-libc (ret2libc): Redirects the execution flow to existing functions inside standard C libraries (like system() or execve()) using arguments controlled by the attacker.
+• ret2syscall: Chains small code fragments together to set up CPU registers and execute a direct kernel system call (such as sys_execve).
+• Memory Protection Relaxation: Uses ROP chains to call functions like mprotect() or VirtualProtect() to change the permissions of a memory page (e.g., the stack) from readable/writable to executable, effectively turning NX off for that region so standard shellcode can run.
+
+https://www.cs.toronto.edu/~krueger/csc209h/tut/gdb_tutorial.html
+
+print win to find the address of the win() function
+

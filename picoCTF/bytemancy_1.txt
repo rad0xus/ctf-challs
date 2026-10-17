@@ -1,0 +1,8 @@
+1. Download the source code, it says that if the user input is x65 1751 times, then it will accept the input
+
+2. Run a simple python script that will print("\x65"\*1751)
+
+```
+python3 -c 'print("\x65"*1751)'
+```
+3. Submit the e's. Get the flag.

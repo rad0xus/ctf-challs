@@ -1,0 +1,187 @@
+Reference Video:
+https://www.youtube.com/watch?v=_QtnRuw_L_A
+
+ctf-player@academy-chall$ lldb ./bypassme.bin
+(lldb) target create "./bypassme.bin"
+Current executable set to '/home/ctf-player/bypassme.bin' (x86_64).
+(lldb) run
+Process 74 launched: '/home/ctf-player/bypassme.bin' (x86_64)
+
+
+
+          ███████╗███████╗ ██████╗██╗   ██╗██████╗ ███████╗    ██████╗  ██████╗ ██████╗ ████████╗ █████╗ ██╗
+          ██╔════╝██╔════╝██╔════╝██║   ██║██╔══██╗██╔════╝    ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔══██╗██║
+          ███████╗█████╗  ██║     ██║   ██║██████╔╝█████╗      ██████╔╝██║   ██║██████╔╝   ██║   ███████║██║
+          ╚════██║██╔══╝  ██║     ██║   ██║██╔══██╗██╔══╝      ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══██║██║
+          ███████║███████╗╚██████╗╚██████╔╝██║  ██║███████╗    ██║     ╚██████╔╝██║  ██║   ██║   ██║  ██║███████╗
+          ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
+
+ Initializing secure modules...
+ Running memory diagnostics...
+ All systems online...
+
+ Access to this terminal is restricted.
+ Please authenticate below.
+----------------------------------------
+
+
+[3 tries left] Enter password: wqertyuiop234567890
+
+Raw Input:      [wqertyuiop234567890]
+Sanitized Input:[wqertyuiop]
+Hint: Input must match something special...
+Access Denied
+
+[2 tries left] Enter password: ././././././../@#$%^&*(
+
+Raw Input:      [././././././../@#$%^&*(]
+Sanitized Input:[]
+Hint: Input must match something special...
+Access Denied
+
+[1 tries left] Enter password: dsfbg
+
+Raw Input:      [dsfbg]
+Sanitized Input:[dsfbg]
+Hint: Input must match something special...
+Access Denied
+
+All attempts used. Try harder!
+Process 74 exited with status = 1 (0x00000001)
+(lldb) diassemble --name main
+error: 'diassemble' is not a valid command.
+(lldb) disassemble --name main
+bypassme.bin`main:
+0x595b5e2d664e <+0>:   endbr64
+0x595b5e2d6652 <+4>:   pushq  %rbp
+0x595b5e2d6653 <+5>:   movq   %rsp, %rbp
+0x595b5e2d6656 <+8>:   subq   $0x220, %rsp ; imm = 0x220
+0x595b5e2d665d <+15>:  movq   %fs:0x28, %rax
+0x595b5e2d6666 <+24>:  movq   %rax, -0x8(%rbp)
+0x595b5e2d666a <+28>:  xorl   %eax, %eax
+0x595b5e2d666c <+30>:  movl   $0x3, -0x21c(%rbp)
+0x595b5e2d6676 <+40>:  leaq   -0x110(%rbp), %rax
+0x595b5e2d667d <+47>:  movq   %rax, %rdi
+0x595b5e2d6680 <+50>:  callq  0x1334         ; decode_password at bypassme.c:16:33
+0x595b5e2d6685 <+55>:  callq  0x14c5         ; intro_sequence at bypassme.c:45:23
+0x595b5e2d668a <+60>:  jmp    0x1837         ; <+489> at bypassme.c:82:20
+0x595b5e2d668f <+65>:  movl   -0x21c(%rbp), %eax
+0x595b5e2d6695 <+71>:  addl   $0x1, %eax
+0x595b5e2d6698 <+74>:  movl   %eax, %esi
+0x595b5e2d669a <+76>:  leaq   0x10f7(%rip), %rax
+0x595b5e2d66a1 <+83>:  movq   %rax, %rdi
+0x595b5e2d66a4 <+86>:  movl   $0x0, %eax
+0x595b5e2d66a9 <+91>:  callq  0x1150         ; ___lldb_unnamed_symbol70 + 64
+0x595b5e2d66ae <+96>:  movq   0x295b(%rip), %rax ; stdout@GLIBC_2.2.5
+0x595b5e2d66b5 <+103>: movq   %rax, %rdi
+0x595b5e2d66b8 <+106>: callq  0x1190         ; ___lldb_unnamed_symbol70 + 128
+0x595b5e2d66bd <+111>: movq   0x295c(%rip), %rdx ; stdin@GLIBC_2.2.5
+0x595b5e2d66c4 <+118>: leaq   -0x210(%rbp), %rax
+0x595b5e2d66cb <+125>: movl   $0x80, %esi
+0x595b5e2d66d0 <+130>: movq   %rax, %rdi
+0x595b5e2d66d3 <+133>: callq  0x1170         ; ___lldb_unnamed_symbol70 + 96
+0x595b5e2d66d8 <+138>: leaq   -0x210(%rbp), %rax
+0x595b5e2d66df <+145>: leaq   0x10d4(%rip), %rdx
+0x595b5e2d66e6 <+152>: movq   %rdx, %rsi
+0x595b5e2d66e9 <+155>: movq   %rax, %rdi
+0x595b5e2d66ec <+158>: callq  0x1160         ; ___lldb_unnamed_symbol70 + 80
+0x595b5e2d66f1 <+163>: movb   $0x0, -0x210(%rbp,%rax)
+0x595b5e2d66f9 <+171>: leaq   -0x190(%rbp), %rdx
+0x595b5e2d6700 <+178>: leaq   -0x210(%rbp), %rax
+0x595b5e2d6707 <+185>: movq   %rdx, %rsi
+0x595b5e2d670a <+188>: movq   %rax, %rdi
+0x595b5e2d670d <+191>: callq  0x13c2         ; sanitize at bypassme.c:24:48
+0x595b5e2d6712 <+196>: leaq   -0x210(%rbp), %rax
+0x595b5e2d6719 <+203>: movq   %rax, %rsi
+0x595b5e2d671c <+206>: leaq   0x1099(%rip), %rax
+0x595b5e2d6723 <+213>: movq   %rax, %rdi
+0x595b5e2d6726 <+216>: movl   $0x0, %eax
+0x595b5e2d672b <+221>: callq  0x1150         ; ___lldb_unnamed_symbol70 + 64
+0x595b5e2d6730 <+226>: leaq   -0x190(%rbp), %rax
+0x595b5e2d6737 <+233>: movq   %rax, %rsi
+0x595b5e2d673a <+236>: leaq   0x1092(%rip), %rax
+0x595b5e2d6741 <+243>: movq   %rax, %rdi
+0x595b5e2d6744 <+246>: movl   $0x0, %eax
+0x595b5e2d6749 <+251>: callq  0x1150         ; ___lldb_unnamed_symbol70 + 64
+0x595b5e2d674e <+256>: leaq   0x109b(%rip), %rax
+0x595b5e2d6755 <+263>: movq   %rax, %rdi
+0x595b5e2d6758 <+266>: callq  0x1120         ; ___lldb_unnamed_symbol70 + 16
+0x595b5e2d675d <+271>: leaq   -0x110(%rbp), %rdx
+0x595b5e2d6764 <+278>: leaq   -0x210(%rbp), %rax
+0x595b5e2d676b <+285>: movq   %rdx, %rsi
+0x595b5e2d676e <+288>: movq   %rax, %rdi
+0x595b5e2d6771 <+291>: callq  0x1180         ; ___lldb_unnamed_symbol70 + 112
+0x595b5e2d6776 <+296>: testl  %eax, %eax
+0x595b5e2d6778 <+298>: jne    0x1828         ; <+474> at bypassme.c:110:19
+0x595b5e2d677e <+304>: callq  0x1453         ; auth_sequence at bypassme.c:34:22
+0x595b5e2d6783 <+309>: leaq   0x1092(%rip), %rax
+0x595b5e2d678a <+316>: movq   %rax, %rsi
+0x595b5e2d678d <+319>: leaq   0x108a(%rip), %rax
+0x595b5e2d6794 <+326>: movq   %rax, %rdi
+0x595b5e2d6797 <+329>: callq  0x11b0         ; ___lldb_unnamed_symbol70 + 160
+0x595b5e2d679c <+334>: movq   %rax, -0x218(%rbp)
+0x595b5e2d67a3 <+341>: cmpq   $0x0, -0x218(%rbp)
+0x595b5e2d67ab <+349>: je     0x1812         ; <+452> at bypassme.c:106:23
+0x595b5e2d67ad <+351>: movq   -0x218(%rbp), %rdx
+0x595b5e2d67b4 <+358>: leaq   -0x90(%rbp), %rax
+0x595b5e2d67bb <+365>: movl   $0x80, %esi
+0x595b5e2d67c0 <+370>: movq   %rax, %rdi
+0x595b5e2d67c3 <+373>: callq  0x1170         ; ___lldb_unnamed_symbol70 + 96
+0x595b5e2d67c8 <+378>: testq  %rax, %rax
+0x595b5e2d67cb <+381>: setne  %al
+0x595b5e2d67ce <+384>: testb  %al, %al
+0x595b5e2d67d0 <+386>: je     0x17f2         ; <+420> at bypassme.c:102:27
+0x595b5e2d67d2 <+388>: leaq   -0x90(%rbp), %rax
+0x595b5e2d67d9 <+395>: movq   %rax, %rsi
+0x595b5e2d67dc <+398>: leaq   0x104f(%rip), %rax
+0x595b5e2d67e3 <+405>: movq   %rax, %rdi
+0x595b5e2d67e6 <+408>: movl   $0x0, %eax
+0x595b5e2d67eb <+413>: callq  0x1150         ; ___lldb_unnamed_symbol70 + 64
+0x595b5e2d67f0 <+418>: jmp    0x1801         ; <+435> at bypassme.c:104:23
+0x595b5e2d67f2 <+420>: leaq   0x1048(%rip), %rax
+0x595b5e2d67f9 <+427>: movq   %rax, %rdi
+0x595b5e2d67fc <+430>: callq  0x1120         ; ___lldb_unnamed_symbol70 + 16
+0x595b5e2d6801 <+435>: movq   -0x218(%rbp), %rax
+0x595b5e2d6808 <+442>: movq   %rax, %rdi
+0x595b5e2d680b <+445>: callq  0x1130         ; ___lldb_unnamed_symbol70 + 32
+0x595b5e2d6810 <+450>: jmp    0x1821         ; <+467> at bypassme.c:108:20
+0x595b5e2d6812 <+452>: leaq   0x103c(%rip), %rax
+0x595b5e2d6819 <+459>: movq   %rax, %rdi
+0x595b5e2d681c <+462>: callq  0x1120         ; ___lldb_unnamed_symbol70 + 16
+0x595b5e2d6821 <+467>: movl   $0x0, %eax
+0x595b5e2d6826 <+472>: jmp    0x1867         ; <+537> at bypassme.c:116:1
+0x595b5e2d6828 <+474>: leaq   0x103b(%rip), %rax
+0x595b5e2d682f <+481>: movq   %rax, %rdi
+0x595b5e2d6832 <+484>: callq  0x1120         ; ___lldb_unnamed_symbol70 + 16
+0x595b5e2d6837 <+489>: movl   -0x21c(%rbp), %eax
+0x595b5e2d683d <+495>: leal   -0x1(%rax), %edx
+0x595b5e2d6840 <+498>: movl   %edx, -0x21c(%rbp)
+0x595b5e2d6846 <+504>: testl  %eax, %eax
+0x595b5e2d6848 <+506>: setne  %al
+0x595b5e2d684b <+509>: testb  %al, %al
+0x595b5e2d684d <+511>: jne    0x168f         ; <+65> at bypassme.c:83:15
+0x595b5e2d6853 <+517>: leaq   0x1026(%rip), %rax
+0x595b5e2d685a <+524>: movq   %rax, %rdi
+0x595b5e2d685d <+527>: callq  0x1120         ; ___lldb_unnamed_symbol70 + 16
+0x595b5e2d6862 <+532>: movl   $0x1, %eax
+0x595b5e2d6867 <+537>: movq   -0x8(%rbp), %rdx
+0x595b5e2d686b <+541>: subq   %fs:0x28, %rdx
+0x595b5e2d6874 <+550>: je     0x187b         ; <+557> at bypassme.c:116:1
+0x595b5e2d6876 <+552>: callq  0x1140         ; ___lldb_unnamed_symbol70 + 48
+0x595b5e2d687b <+557>: leave
+0x595b5e2d687c <+558>: retq
+(lldb) b decode_password
+Breakpoint 1: where = bypassme.bin`decode_password(char*) + 31 at bypassme.c:17:19, address = 0x0000595b5e2d6353
+(lldb) run
+Process 112 launched: '/home/ctf-player/bypassme.bin' (x86_64)
+Process 112 stopped
+* thread #1, name = 'bypassme.bin', stop reason = breakpoint 1.1
+    frame #0: 0x000062d971b8e353 bypassme.bin`decode_password(out="\xf9\U00000002") at bypassme.c:17:19
+(lldb) finish
+Process 112 stopped
+* thread #1, name = 'bypassme.bin', stop reason = step out
+    frame #0: 0x000062d971b8e685 bypassme.bin`main at bypassme.c:80:19
+(lldb) expr (char*)($rbp - 0x110)
+(char *) $0 = 0x00007ffe6bd97c80 "SuperSecure"
+(lldb)
+

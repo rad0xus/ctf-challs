@@ -1,0 +1,9 @@
+touch part.zip
+cat part_aa > part.zip
+cat part_ab >> part.zip
+cat part_ac >> part.zip
+cat part_ad >> part.zip
+cat part_ae >> part.zip
+unzip part.zip
+enter password supersecret
+cat flag.txt

