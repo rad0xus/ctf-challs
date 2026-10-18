@@ -1,0 +1,158 @@
+# Writeup: Auto-REV — CyLab Academy
+
+## What the challenge asks
+
+The service sends **20 binaries**, one per round, each with a **10-second limit** to submit "the secret." Each binary arrives as a hex dump starting with `7f454c46` (`\x7fELF`), so it's a standard x86-64 Linux ELF.
+
+The timer is the design. Opening Ghidra and decompiling takes minutes even for a tiny binary. So the intended solve is: **reverse one binary by hand, then script the pattern for the other 19.**
+
+---
+
+## Step 1 — Manual attempt on one binary
+
+Rebuild the ELF from the hex in the prompt:
+
+```bash
+xxd -r -p bin.raw bin
+chmod +x bin
+```
+
+`xxd -r -p` reverses a plain hex dump to binary.
+
+Disassemble `main` in pwndbg:
+
+```
+pwndbg> disass main
+   0x40113e <+8>:  mov    DWORD PTR [rbp-0x4],0x35a84c26
+   ...
+   0x401167 <+49>: call   __isoc99_scanf@plt
+   0x40116c <+54>: mov    eax,DWORD PTR [rbp-0x8]
+   0x40116f <+57>: cmp    DWORD PTR [rbp-0x4],eax
+   0x401172 <+60>: jne    0x401180
+```
+
+What it does:
+
+- `mov DWORD PTR [rbp-0x4], 0x35a84c26` — the **secret** is a 32-bit constant on the stack.
+- `scanf` reads the guess into `[rbp-0x8]`.
+- `cmp [rbp-0x4], eax; jne` — compare secret vs. guess.
+
+So the C source is essentially:
+
+```c
+int main(void) {
+    unsigned int secret = 0x35a84c26;   // changes each round
+    unsigned int guess = 0;
+    puts("What's the secret?");
+    scanf("%u", &guess);
+    if (secret == guess) puts("Correct!");
+    else                 puts("Nice try :(");
+}
+```
+
+Two facts fall out, and both must be respected by the solver:
+
+**The secret is a plain 32-bit constant.** No arithmetic, no obfuscation — it sits directly in the instruction stream.
+
+**`scanf` uses `%u` — decimal.** So send decimal, not hex. `0x35a84c26` = `900221990`. Verified with `bc`:
+
+```
+ibase=16
+35A84C26
+# -> 900221990
+```
+
+---
+
+## Step 2 — First submission, and the pivot
+
+Sent `900221990` to the live service:
+
+```
+What's the secret?:900221990
+Too slow :(
+```
+
+The value was right, but the round still failed. The manual pipeline (receive → disassemble → read → convert → type) is *correct* but can't finish in 10 seconds. That's the challenge telling me to script it.
+
+---
+
+## Step 3 — Turn the RE into a byte pattern
+
+`mov DWORD PTR [rbp-0x4], imm32` compiles to 7 bytes. The first 3 are fixed:
+
+| bytes | meaning |
+|---|---|
+| `c7 45 fc` | `mov dword ptr [rbp-0x4], imm32` (fixed prefix) |
+| next 4 bytes | the secret, little-endian |
+
+So in the raw ELF the secret is always the 4 bytes right after `c7 45 fc`, read little-endian.
+
+Why is this stable across all 20 rounds?
+
+1. **Same source.** One program, one secret per round. The compare is the whole logic.
+2. **Same compiler and flags.** `.comment` reads `GCC 14.2.1`. The secret stays on the stack — that's `-O0`. Under optimization it would become `mov eax, imm32` (`b8 xx xx xx xx`) and the pattern would vanish.
+3. **No slot shuffle.** At `-O0`, GCC puts the first local at `[rbp-0x4]`, so `45 fc` stays fixed across builds.
+
+So `c7 45 fc` is the invariant; only the following 4 bytes change.
+
+---
+
+## Step 4 — The solver
+
+```python
+from pwn import *
+import re
+
+context.log_level = 'info'
+
+HOST, PORT = 'chatelaine.cylabacademy.net', 40917
+
+def extract_secret(bin_bytes: bytes) -> int:
+    # Primary: mov DWORD PTR [rbp-0x4], imm32
+    m = re.search(rb'\xc7\x45\xfc(.{4})', bin_bytes, re.DOTALL)
+    if m:
+        return int.from_bytes(m.group(1), 'little')
+
+    # Fallback: any `mov dword [rbp+disp8], imm32` if the slot moved
+    m = re.search(rb'\xc7\x45.(.{4})', bin_bytes, re.DOTALL)
+    if m:
+        return int.from_bytes(m.group(1), 'little')
+
+    raise ValueError("secret pattern not found")
+
+def main():
+    io = remote(HOST, PORT)
+
+    for rnd in range(1, 21):
+        io.recvuntil(b"Here's the next binary in bytes:")
+        io.recvline()                       # newline after the colon
+        hex_line = io.recvline().strip()    # one long hex dump line
+
+        bin_bytes = bytes.fromhex(hex_line.decode())
+        secret = extract_secret(bin_bytes)
+        log.success(f"round {rnd}: secret = {secret} (0x{secret:x})")
+
+        io.recvuntil(b"What's the secret?:")
+        io.sendline(str(secret).encode())   # DECIMAL, because scanf uses %u
+
+    print(io.recvall(timeout=10).decode(errors='replace'))
+
+main()
+```
+
+A few notes on the choices:
+
+- **`rb'...'` bytes regex.** We're scanning raw ELF bytes; mixing `str` and `bytes` regexes silently fails.
+- **`int.from_bytes(imm, 'little')`.** x86 is little-endian. Big-endian would produce `0x264ca835` and the server rejects it.
+- **`str(secret).encode()`.** Sends decimal to match `%u`. This is the format decision from the RE.
+- **`recvuntil(b"What's the secret?:")` after extraction.** Waits for the prompt after parsing, so TCP fragmentation can't swallow the hex line or the prompt.
+- **Fallback regex.** `c7 45 .` matches `[rbp+disp8]` regardless of the exact disp8. If the C source gains another local above `secret`, the store moves to `[rbp-0x8]` (`c7 45 f8`) and the primary pattern breaks. The fallback catches that.
+
+Run it and it clears all 20 rounds and prints the flag.
+
+---
+
+## The lesson
+
+The manual pipeline was *correct* — it produced `900221990` — but it lost to "Too slow." That's the challenge telling you the intended solve is a script. The RE gave you what the script needs: the secret is a static constant, and `%u` means decimal. Once you know the shape, the solver reduces to three things that must all be right: **the pattern** (`c7 45 fc` + 4 bytes), **the endianness** (little), and **the wire format** (decimal). Get all three and the challenge falls in a single connection.
