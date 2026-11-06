@@ -1,0 +1,16 @@
+.md-typeset a.md-button.ctf-pill {
+  margin: 0.25em 0.4em 0.25em 0;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  font-size: 0.75em;
+  line-height: 1.4;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.md-typeset a.md-button.ctf-pill:hover,
+.md-typeset a.md-button.ctf-pill:focus-visible {
+  border-color: var(--md-accent-fg-color);
+  background-color: var(--md-accent-fg-color);
+  color: var(--md-accent-bg-color);
+}

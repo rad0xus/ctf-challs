@@ -1,0 +1,177 @@
+[project]
+site_url = "https://rad0xus.github.io/ctf-challs/"
+site_name = "CTFs by parad0x"
+# site_description = "CTFs solved by player rad0xus"
+# site_author = "rad0xus"
+
+# copyright = "Copyright &copy; 2026 Your name"
+
+repo_url = "https://rad0xus.github.io/ctf-challs/"
+repo_name = "rad0xus/ctf-challs"
+# edit_uri = "edit/main/docs/"
+extra_css = ["stylesheets/extra.css"]
+
+[[project.nav]]
+"Index" = "index.md"
+
+[[project.nav]]
+[[project.nav."PICOCTF-2026"]]
+"StegoRSA" = "picoCTF-2026/StegoRSA.md"
+[[project.nav."PICOCTF-2026"]]
+"Absolute Nano" = "picoCTF-2026/absolute_nano.md"
+[[project.nav."PICOCTF-2026"]]
+"Autorev 1" = "picoCTF-2026/autorev_1.md"
+[[project.nav."PICOCTF-2026"]]
+"Binary Digits" = "picoCTF-2026/binary_digits.md"
+[[project.nav."PICOCTF-2026"]]
+"Bypass Me" = "picoCTF-2026/bypass_me.md"
+[[project.nav."PICOCTF-2026"]]
+"Bytemancy 1" = "picoCTF-2026/bytemancy_1.md"
+[[project.nav."PICOCTF-2026"]]
+"Credential Stuffing" = "picoCTF-2026/credential_stuffing.md"
+[[project.nav."PICOCTF-2026"]]
+"Echo Escape 1" = "picoCTF-2026/echo_escape_1.md"
+[[project.nav."PICOCTF-2026"]]
+"Failure Failure" = "picoCTF-2026/failure_failure.md"
+[[project.nav."PICOCTF-2026"]]
+"Hashgate" = "picoCTF-2026/hashgate.md"
+[[project.nav."PICOCTF-2026"]]
+"Hidden Cipher 2" = "picoCTF-2026/hidden_cipher_2.md"
+[[project.nav."PICOCTF-2026"]]
+"Multicode" = "picoCTF-2026/multicode.md"
+[[project.nav."PICOCTF-2026"]]
+"My Git" = "picoCTF-2026/my_git.md"
+[[project.nav."PICOCTF-2026"]]
+"No FA" = "picoCTF-2026/no_fa.md"
+[[project.nav."PICOCTF-2026"]]
+"Old Sessions" = "picoCTF-2026/old_sessions.md"
+[[project.nav."PICOCTF-2026"]]
+"Password Profiler" = "picoCTF-2026/password_profiler.md"
+[[project.nav."PICOCTF-2026"]]
+"Piece by Piece" = "picoCTF-2026/piece_by_piece.md"
+[[project.nav."PICOCTF-2026"]]
+"Ping CMD" = "picoCTF-2026/ping-cmd.md"
+[[project.nav."PICOCTF-2026"]]
+"Printer Shares" = "picoCTF-2026/printer_shares.md"
+[[project.nav."PICOCTF-2026"]]
+"Quizploit" = "picoCTF-2026/quizploit.md"
+[[project.nav."PICOCTF-2026"]]
+"Secret Box" = "picoCTF-2026/secret_box.md"
+[[project.nav."PICOCTF-2026"]]
+"Secure Password Database" = "picoCTF-2026/secure_password_database.md"
+[[project.nav."PICOCTF-2026"]]
+"Shared Secrets" = "picoCTF-2026/shared_secrets.md"
+[[project.nav."PICOCTF-2026"]]
+"Sudo Make Me a Sandwich" = "picoCTF-2026/sudo_make_me_a_sandwich.md"
+[[project.nav."PICOCTF-2026"]]
+"Undo" = "picoCTF-2026/undo.md"
+
+[[project.nav]]
+[[project.nav."CREST-CTF-2.0"]]
+"Query Shadow" = "CREST-CTF-2.0/query_shadow.md"
+[[project.nav."CREST-CTF-2.0"]]
+"Session Drift" = "CREST-CTF-2.0/session_drift.md"
+[[project.nav."CREST-CTF-2.0"]]
+"Well Known" = "CREST-CTF-2.0/well_known.md"
+[[project.nav."CREST-CTF-2.0"]]
+"White Pixel" = "CREST-CTF-2.0/white_pixel.md"
+
+# extra_javascript = ["javascripts/extra.js"]
+
+[project.theme]
+# variant = "classic"
+# custom_dir = "overrides"
+# favicon = "images/favicon.png"
+language = "en"
+features = [
+  "announce.dismiss",
+  # "content.action.edit",
+  # "content.action.view",
+  "content.code.annotate",
+  "content.code.copy",
+  "content.code.select",
+  "content.footnote.tooltips",
+  "content.tabs.link",
+  "content.tooltips",
+  # "header.autohide",
+  # "navigation.expand",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  # "navigation.instant.progress",
+  "navigation.path",
+  # "navigation.prune",
+  # "navigation.tabs",
+  # "navigation.tabs.sticky",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  # "toc.follow",
+  # "toc.integrate",
+]
+
+# logo = "assets/logo.png"
+
+# [project.theme.icon]
+# logo = "lucide/smile"
+
+# [project.theme.font]
+# text = "Inter"
+# code = "Jetbrains Mono"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+# [[project.extra.social]]
+# icon = "fontawesome/brands/github"
+# link = "https://github.com/user/repo"
+
+# [[project.extra.social]]
+# icon = "fontawesome/brands/mastodon"
+# link = "https://fosstodon.org/@user"
+
+[project.markdown_extensions]
+abbr = {}
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.arithmatex.generic = true
+pymdownx.betterem = {}
+pymdownx.caret = {}
+pymdownx.details = {}
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.magiclink = {}
+pymdownx.mark = {}
+pymdownx.smartsymbols = {}
+# pymdownx.snippets.base_path = "includes"
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true
+pymdownx.tasklist.custom_checkbox = true
+pymdownx.tilde = {}
