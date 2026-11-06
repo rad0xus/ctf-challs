@@ -1,5 +1,7 @@
 # CTF Write-ups
 
+To navigate back to the main blogsite, [click here](https://rad0xus.github.io)
+
 Browse write-ups by competition:
 
 ## picoCTF 2026
